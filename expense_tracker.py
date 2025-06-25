@@ -22,3 +22,18 @@ def list_expenses():
         for expense in expenses:
             print(f"ID: {expense['id']}, Description: {expense['description']}, Amount: {expense['amount']}, Category: {expense['category']}")
 
+
+def summarize_by_category():
+    if len(expenses) == 0:
+        print("No expenses")
+    else:
+        totals = {}
+        for expense in expenses:
+            category = expense["category"]
+            amount = expense["amount"]
+            if category not in totals:
+                totals[category] = 0
+
+            totals[category] += amount
+
+    print(totals)
