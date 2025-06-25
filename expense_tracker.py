@@ -1,4 +1,4 @@
-
+import os
 
 expenses = []
 
@@ -18,6 +18,7 @@ def add_expense(description, amount, category):
 def list_expenses():
     if len(expenses) == 0:
         print("No expenses")
+        return
     else:
         for expense in expenses:
             print(f"ID: {expense['id']}, Description: {expense['description']}, Amount: {expense['amount']}, Category: {expense['category']}")
@@ -26,6 +27,7 @@ def list_expenses():
 def summarize_by_category():
     if len(expenses) == 0:
         print("No expenses")
+        return
     else:
         totals = {}
         for expense in expenses:
@@ -33,7 +35,41 @@ def summarize_by_category():
             amount = expense["amount"]
             if category not in totals:
                 totals[category] = 0
-
             totals[category] += amount
+        for category in totals:
+            print(f"{category}: {totals[category]}")
 
-    print(totals)
+
+def save_expenses(filename):
+    if len(expenses) == 0:
+        print("No expenses")
+        return
+
+    else:
+        with open(filename, "w") as file:
+            for expense in expenses:
+                file.write(f"{expense['id']},{expense['description']},{expense['amount']},{expense['category']}\n")
+
+
+def load_expenses(filename):
+    if len(expenses) == 0:
+        print("No expenses")
+        return
+
+    else:
+        import os
+        if not os.path.exists(filename):
+            return
+
+        else:
+            with open(filename, "r") as file:
+
+                for line in file:
+                    parts = line.strip().split(",")
+
+                    expense = {"id": int(parts[0]),
+                               "description": parts[1],
+                               "amount": float(parts[2]),
+                               "category": parts[3]}
+
+                    expenses.append(expense)
