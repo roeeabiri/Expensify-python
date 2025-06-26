@@ -24,14 +24,21 @@ cd ExpensifyVENV
 Or download and extract the project files to a folder (e.g., ExpensifyVENV).
 
 
-Set Up a Virtual Environment (recommended):
-python3 -m venv .
-source bin/activate  # On Windows: .\Scripts\activate
+Create and Activate a Virtual Environment:
+
+To keep dependencies isolated, create a virtual environment:python3 -m venv .
 
 
-Verify tkinter:
+Activate the virtual environment:source bin/activate  # On Windows: .\Scripts\activate
 
-Run the following to check if tkinter is installed:python3 -c "import tkinter"
+
+Why? A virtual environment ensures that the project uses its own Python environment, avoiding conflicts with other projects.
+
+
+Install Dependencies:
+
+The project has no external dependencies (see requirements.txt).
+Verify that tkinter is available:python3 -c "import tkinter"
 
 
 If you get an error, install tkinter:sudo apt-get install python3-tk
@@ -113,6 +120,7 @@ Project Structure
 expense_tracker.py: The CLI script for managing expenses.
 expense_tracker_gui.py: The GUI script for adding expenses.
 expenses.txt: The file where expenses are stored (created automatically when adding expenses).
+requirements.txt: Lists project dependencies (none required beyond the standard library).
 README.md: This documentation file.
 
 Example Workflow
