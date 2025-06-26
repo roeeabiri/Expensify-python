@@ -1,43 +1,115 @@
+import argparse
 import os
 
 expenses = []
 
+def main():
+    load_expenses("expenses.txt")
+
+    parser = argparse.ArgumentParser(description="Expense Tracker CLI")
+    subparsers = parser.add_subparsers(dest="command")
+
+    add_parser = subparsers.add_parser("add", help="Add an expense")
+    delete_parser = subparsers.add_parser("delete", help="Delete an expense")
+    list_parser = subparsers.add_parser("list", help="List all expenses")
+    summary_parser = subparsers.add_parser("summary", help="Summarize expenses by categories")
+
+    add_parser.add_argument("description", type=str, help="Description of expense")
+    add_parser.add_argument("amount", type=float, help="Amount of expense")
+    add_parser.add_argument("category", type=str, help="Category of expense")
+
+    delete_parser.add_argument("id", type=int, help="ID of expense")
+
+    list_parser.add_argument("--category", type=str, help="Filter by category", default=None)
+
+    summary_parser.add_argument("--min_amount", type=float, help="Minimum amount of expense to be in the summary", default=None)
+
+    args = parser.parse_args()
+
+    if args.command == "add":
+        add_expense(args.description, args.amount, args.category)
+        save_expenses("expenses.txt")
+
+    elif args.command == "delete":
+        delete_expense(args.id)
+        save_expenses("expenses.txt")
+
+    elif args.command == "list":
+        list_expenses(args.category)
+
+    elif args.command == "summary":
+        summarize_by_category(args.min_amount)
+
+    else:
+        parser.print_help()
+
+
 
 def add_expense(description, amount, category):
-    try:
-        amount = float(amount)
-    except ValueError:
-        print("Error: Amount must be a number")
-        return
-
     new_id = len(expenses) + 1
+
     expense = {"id": new_id, "description": description, "amount": amount, "category": category}
     expenses.append(expense)
+
     print(f"Added expense: {description}, {amount}, {category}")
 
-def list_expenses():
-    if len(expenses) == 0:
+
+def delete_expense(id):
+    if not expenses:
+        print("No expenses to delete")
+        return
+
+    expense = next((e for e in expenses if e["id"] == id), None)
+
+    if expense:
+        expenses.remove(expense)
+        print(f"Expense with ID {id} deleted")
+
+        for i, e in enumerate(expenses, 1):
+            e["id"] = i
+
+    else:
+        print(f"No expense found with ID {id}")
+
+
+def list_expenses(category=None):
+    if not expenses:
         print("No expenses")
         return
-    else:
-        for expense in expenses:
+
+    found = False
+    for expense in expenses:
+        if category is None or expense["category"] == category:
             print(f"ID: {expense['id']}, Description: {expense['description']}, Amount: {expense['amount']}, Category: {expense['category']}")
+            found = True
+
+    if not found and category is not None:
+        print(f"No expenses in category {category}")
 
 
-def summarize_by_category():
+def summarize_by_category(min_amount):
     if len(expenses) == 0:
         print("No expenses")
         return
-    else:
-        totals = {}
-        for expense in expenses:
-            category = expense["category"]
-            amount = expense["amount"]
+
+    totals = {}
+    for expense in expenses:
+         category = expense["category"]
+         amount = expense["amount"]
+
+         if min_amount is None or amount >= min_amount:
+
             if category not in totals:
                 totals[category] = 0
+
             totals[category] += amount
-        for category in totals:
-            print(f"{category}: {totals[category]}")
+
+    if not totals:
+        print(f"No expenses above {min_amount}" if min_amount is not None else "No expenses")
+        return
+
+    for category in totals:
+        print(f"Category: {category}, Total: {totals[category]}")
 
 
 def save_expenses(filename):
@@ -45,31 +117,35 @@ def save_expenses(filename):
         print("No expenses")
         return
 
-    else:
-        with open(filename, "w") as file:
-            for expense in expenses:
-                file.write(f"{expense['id']},{expense['description']},{expense['amount']},{expense['category']}\n")
+    with open(filename, "w") as file:
+        for expense in expenses:
+            file.write(f"{expense['id']},{expense['description']},{expense['amount']},{expense['category']}\n")
 
 
 def load_expenses(filename):
-    if len(expenses) == 0:
-        print("No expenses")
+    expenses.clear()
+
+    if not os.path.exists(filename):
         return
 
-    else:
-        import os
-        if not os.path.exists(filename):
-            return
+    with open(filename, "r") as file:
+        for line in file:
+            try:
+                parts = line.strip().split(",")
+                if len(parts) != 4:
+                    continue
 
-        else:
-            with open(filename, "r") as file:
+                expense = {
+                    "id": int(parts[0]),
+                    "description": parts[1],
+                    "amount": float(parts[2]),
+                    "category": parts[3]
+                }
 
-                for line in file:
-                    parts = line.strip().split(",")
+                expenses.append(expense)
 
-                    expense = {"id": int(parts[0]),
-                               "description": parts[1],
-                               "amount": float(parts[2]),
-                               "category": parts[3]}
+            except (ValueError, IndexError):
+                continue
 
-                    expenses.append(expense)
+if __name__ == "__main__":
+    main()
