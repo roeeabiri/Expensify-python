@@ -1,11 +1,15 @@
 import tkinter as tk
 from tkinter import messagebox
-from expense_tracker import add_expense, load_expenses, save_expenses
+from expense_tracker import add_expense, load_expenses, save_expenses, list_expenses
+import io
+from contextlib import redirect_stdout
 
 def gui_main():
     window = tk.Tk()
     window.title("Expense Tracker")
     window.geometry("400x300")
+
+    load_expenses("expenses.txt")
 
     description_label = tk.Label(window, text="Description")
     description_label.pack(pady=10, padx=10)
@@ -50,6 +54,29 @@ def gui_main():
 
     add_expense_button = tk.Button(window, text="Add Expense", command=add)
     add_expense_button.pack(pady=10)
+
+    filter_label = tk.Label(window, text="Filter by Category (optional)")
+    filter_label.pack(pady=10, padx=10)
+
+    filter_entry = tk.Entry(window, width=30)
+    filter_entry.pack(pady=10, padx=10)
+
+    text_area = tk.Text(window, height=10, width=50)
+    text_area.pack(pady=10)
+
+    def show_list():
+        text_area.delete(1.0, tk.END)
+
+        with io.StringIO() as buf, redirect_stdout(buf):
+            category = filter_entry.get()
+            list_expenses(category if category else None)
+
+            output = buf.getvalue()
+
+            text_area.insert(tk.END, output)
+
+    list_button = tk.Button(window, text="List Expenses", command=show_list)
+    list_button.pack(pady=10)
 
     window.mainloop()
 
