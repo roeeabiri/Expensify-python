@@ -49,35 +49,19 @@ def main():
                 print(f"ID: {exp[0]}, description: {exp[1]}, amount: {exp[2]}, category: {exp[3]}")
 
     elif args.command == "summary":
-        summarize_by_category(args.min_amount)
+
+        totals = tracker.summarize_by_category(args.min_amount)
+
+        if not totals:
+            print(f"no expenses{' above ' + str(args.min_amount) if args.min_amount is not None else ''}")
+
+        else:
+            for category, total in totals:
+                print(f"category: {category}, total: {total}")
 
     else:
         parser.print_help()
 
-
-def summarize_by_category(min_amount):
-    if len(expenses) == 0:
-        print("No expenses")
-        return
-
-    totals = {}
-    for expense in expenses:
-         category = expense["category"]
-         amount = expense["amount"]
-
-         if min_amount is None or amount >= min_amount:
-
-            if category not in totals:
-                totals[category] = 0
-
-            totals[category] += amount
-
-    if not totals:
-        print(f"No expenses above {min_amount}" if min_amount is not None else "No expenses")
-        return
-
-    for category in totals:
-        print(f"Category: {category}, Total: {totals[category]}")
 
 
 def save_expenses(filename):

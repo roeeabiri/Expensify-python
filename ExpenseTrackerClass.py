@@ -75,5 +75,24 @@ class ExpenseTrackerClass:
             return False
 
 
+    def summarize_by_category(self, min_amount=None):
+        try:
+            query = 'SELECT category, SUM(amount) as total FROM expenses'
+            params = []
+
+            if min_amount is not None:
+                query += ' WHERE amount >= ?'
+                params.append(min_amount)
+
+            query += ' GROUP BY category'
+            self.cursor.execute(query, params)
+
+            totals = self.cursor.fetchall()
+            return totals
+
+        except sqlite3.Error as e:
+            print(f"error summarizing by category: {e}")
+            return []
+
     def __del__(self):
         self.conn.close()
