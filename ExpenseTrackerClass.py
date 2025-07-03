@@ -40,6 +40,40 @@ class ExpenseTrackerClass:
         except (ValueError, sqlite3.Error) as e:
             print(f" error adding expense: {e}")
 
+    def list_expenses(self, category=None):
+        try:
+            query = 'SELECT id, description, amount, category FROM expenses'
+            params = []
+
+            if category:
+                query += ' WHERE category = ?'
+                params.append(category)
+
+            self.cursor.execute(query, params)
+            expenses = self.cursor.fetchall()
+            return expenses
+
+        except sqlite3.Error as e:
+            print(f"שגיאה ברשימת הוצאות: {e}")
+            return []
+
+
+    def delete_expense(self, expense_id):
+        try:
+            self.cursor.execute('DELETE FROM expenses WHERE id = ?', (expense_id,))
+            self.conn.commit()
+            if self.conn.total_changes > 0:
+                print(f"expense deleted with id: {expense_id}")
+                return True
+
+            else:
+                print(f"no expense found with id: {expense_id}")
+                return False
+
+        except sqlite3.Error as e:
+            print(f" error deleting expense: {e}")
+            return False
+
 
     def __del__(self):
         self.conn.close()

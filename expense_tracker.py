@@ -35,50 +35,24 @@ def main():
 
 
     elif args.command == "delete":
-        delete_expense(args.id)
-        save_expenses("expenses.txt")
+        tracker.delete_expense(args.id)
+
 
     elif args.command == "list":
-        list_expenses(args.category)
+        expenses = tracker.list_expenses(args.category)
+
+        if not expenses:
+            print(f"אין הוצאות{' בקטגוריה ' + args.category if args.category else ''}")
+
+        else:
+            for exp in expenses:
+                print(f"ID: {exp[0]}, description: {exp[1]}, amount: {exp[2]}, category: {exp[3]}")
 
     elif args.command == "summary":
         summarize_by_category(args.min_amount)
 
     else:
         parser.print_help()
-
-
-def delete_expense(id):
-    if not expenses:
-        print("No expenses to delete")
-        return
-
-    expense = next((e for e in expenses if e["id"] == id), None)
-
-    if expense:
-        expenses.remove(expense)
-        print(f"Expense with ID {id} deleted")
-
-        for i, e in enumerate(expenses, 1):
-            e["id"] = i
-
-    else:
-        print(f"No expense found with ID {id}")
-
-
-def list_expenses(category=None):
-    if not expenses:
-        print("No expenses")
-        return
-
-    found = False
-    for expense in expenses:
-        if category is None or expense["category"] == category:
-            print(f"ID: {expense['id']}, Description: {expense['description']}, Amount: {expense['amount']}, Category: {expense['category']}")
-            found = True
-
-    if not found and category is not None:
-        print(f"No expenses in category {category}")
 
 
 def summarize_by_category(min_amount):
