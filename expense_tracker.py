@@ -1,10 +1,10 @@
 import argparse
 import os
-
-expenses = []
+import sqlite3
+from ExpenseTrackerClass import ExpenseTrackerClass
 
 def main():
-    load_expenses("expenses.txt")
+    tracker = ExpenseTrackerClass()
 
     parser = argparse.ArgumentParser(description="Expense Tracker CLI")
     subparsers = parser.add_subparsers(dest="command")
@@ -27,8 +27,12 @@ def main():
     args = parser.parse_args()
 
     if args.command == "add":
-        add_expense(args.description, args.amount, args.category)
-        save_expenses("expenses.txt")
+        try:
+            tracker.add_expense(args.description, args.amount, args.category)
+
+        except ValueError as e:
+            print(e)
+
 
     elif args.command == "delete":
         delete_expense(args.id)
@@ -42,16 +46,6 @@ def main():
 
     else:
         parser.print_help()
-
-
-
-def add_expense(description, amount, category):
-    new_id = len(expenses) + 1
-
-    expense = {"id": new_id, "description": description, "amount": amount, "category": category}
-    expenses.append(expense)
-
-    print(f"Added expense: {description}, {amount}, {category}")
 
 
 def delete_expense(id):
