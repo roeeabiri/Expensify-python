@@ -1,15 +1,13 @@
 import tkinter as tk
 from tkinter import messagebox
-from expense_tracker import add_expense, load_expenses, save_expenses, list_expenses
-import io
-from contextlib import redirect_stdout
+from ExpenseTrackerClass import *
 
 def gui_main():
+    tracker = ExpenseTrackerClass()
+
     window = tk.Tk()
     window.title("Expense Tracker")
     window.geometry("400x300")
-
-    load_expenses("expenses.txt")
 
     description_label = tk.Label(window, text="Description")
     description_label.pack(pady=10, padx=10)
@@ -38,8 +36,7 @@ def gui_main():
             try:
                 amount = float(amount)
 
-                add_expense(description, amount, category)
-                save_expenses("expenses.txt")
+                tracker.add_expense(description, amount, category)
                 messagebox.showinfo("Success", f"Added expense: {description}")
 
                 description_entry.delete(0, tk.END)
@@ -66,14 +63,15 @@ def gui_main():
 
     def show_list():
         text_area.delete(1.0, tk.END)
+        category = filter_entry.get()
+        expenses = tracker.list_expenses(category if category else None)
 
-        with io.StringIO() as buf, redirect_stdout(buf):
-            category = filter_entry.get()
-            list_expenses(category if category else None)
+        if not expenses:
+            text_area.insert(tk.END, f"no expenses{' in category ' + category if category else ''}\n")
 
-            output = buf.getvalue()
-
-            text_area.insert(tk.END, output)
+        else:
+            for exp in expenses:
+                text_area.insert(tk.END, f"ID: {exp[0]}, description: {exp[1]}, amount: {exp[2]}, category: {exp[3]}\n")
 
     list_button = tk.Button(window, text="List Expenses", command=show_list)
     list_button.pack(pady=10)
